@@ -1,0 +1,17 @@
+## mk-change-chr-dbSNP ###
+# mkfile script with dependency rules for:
+#	1. Change chr nomenclature from original dbSNP to human type.
+## For more information about 'mk' dependency control, see https://9fans.github.io/plan9port/man/man1/mk.html
+
+## Define shell command line which will be used to run scripts.
+MKSHELL=/bin/bash
+%.bed.gz:Q: %.tsv.bgz
+	zcat $prereq \
+	| tail -n+2 \
+	| tr : \\t \
+	| awk '
+		{FS="\t";OFS="\t";print $1,$2-1,$2,$3}
+		' \
+	| bgzip > $target.build \
+	&& mv $target.build $target \
+	&& tabix -p bed $target
